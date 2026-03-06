@@ -7,19 +7,19 @@ Bash scripting repository following modern shell development standards.
 
 ### Linting & Formatting
 ```bash
-# Lint all shell scripts
+# Lint a single script
 shellcheck script.sh
 
-# Format shell scripts (2-space indent)
+# Format a single script (2-space indent)
 shfmt -i 2 -w script.sh
 
-# Lint and format in one pass
-shellcheck script.sh && shfmt -i 2 -w script.sh
+# Lint and format all scripts in the repo
+shellcheck *.sh && shfmt -i 2 -w *.sh
 ```
 
 ### Testing
 ```bash
-# Run all tests (if using bats)
+# Run all tests
 bats tests/
 
 # Run single test file
@@ -29,7 +29,7 @@ bats tests/test-name.bats
 bats tests/test-name.bats -f "test description"
 
 # Run with verbose output
-bats -v tests/
+bats --verbose-run tests/
 ```
 
 ### Installation (if needed)
@@ -61,7 +61,7 @@ sudo apt install bats  # Debian/Ubuntu
 ### Variables
 - Use `local` for function-scoped variables
 - Quote all variable expansions: `"$var"` not `$var`
-- Use uppercase for global constants, lowercase for local variables
+- Use `readonly` for global constants, `local` for function-scoped variables
 - Initialize variables before use
 
 ### Arrays
@@ -69,7 +69,7 @@ sudo apt install bats  # Debian/Ubuntu
   ```bash
   files=("file1" "file2" "file3")
   for file in "${files[@]}"; do
-    echo "$file"
+    printf '%s\n' "$file"
   done
   ```
 
@@ -82,7 +82,6 @@ sudo apt install bats  # Debian/Ubuntu
 - Use descriptive names with underscores: `process_files()`
 - Return exit codes (0 success, non-zero failure)
 - Output results via stdout, not global variables
-- Document parameters in comments
 
 ### File Operations
 - Quote file paths with spaces: `"/path/with spaces/file"`
@@ -90,17 +89,12 @@ sudo apt install bats  # Debian/Ubuntu
 - Prefer `>>` for appending, `>` for overwriting
 - Use `readlink -f` for absolute paths
 
-### Process Management
-- Use `&` for background processes
-- Track PIDs and wait for completion
-- Use `wait` to collect exit codes
-
 ## Security
 
 - Never use `eval` with untrusted input
 - Sanitize user input before command substitution
 - Use `printf` instead of `echo` for predictable output
-- Avoid `rm -rf` - use safer alternatives
+- Avoid `rm -rf` — use safer alternatives like `trash`
 - Set restrictive permissions: `chmod 700` for scripts
 
 ## Best Practices
@@ -109,14 +103,13 @@ sudo apt install bats  # Debian/Ubuntu
 - One responsibility per function
 - Use `command -v` to check for external commands
 - Prefer builtins over external commands when possible
-- Add comments for complex logic, not obvious operations
 - Use `printf '%s\n' "$var"` for portable output
 
 ## Git Workflow
 
 - Use feature branches for all changes
 - Commit messages in imperative mood, ≤72 chars
-- Run `shellcheck` and `shfmt` before committing
+- Run `shellcheck *.sh && shfmt -d *.sh` before committing
 - No secrets or credentials in scripts
 
 ## Dependencies
@@ -125,8 +118,9 @@ sudo apt install bats  # Debian/Ubuntu
 - Check for required commands at script start using `command -v`:
   ```bash
   check_dependencies() {
+    local deps=("$@")
     local missing=()
-    for cmd in curl jq; do
+    for cmd in "${deps[@]}"; do
       if ! command -v "$cmd" &>/dev/null; then
         missing+=("$cmd")
       fi
@@ -136,5 +130,6 @@ sudo apt install bats  # Debian/Ubuntu
       return 1
     fi
   }
+  # Usage: check_dependencies curl jq numfmt
   ```
 - Use `#!/usr/bin/env bash` for portability over `#!/bin/bash`
