@@ -109,7 +109,9 @@ sudo apt install bats  # Debian/Ubuntu
 
 - Use feature branches for all changes
 - Commit messages in imperative mood, ≤72 chars
-- Always include `Assisted-by: opencode with qwen3.5-27b` trailer in commits
+- Always include `Assisted-by: <model>` trailer in commits
+  - Use `git-commit.sh` helper (auto-adds trailer)
+  - Or set `MODEL_NAME` env var: `MODEL_NAME="opencode with qwen3.5-27b"`
 - Run `shellcheck *.sh && shfmt -d *.sh` before committing
 - No secrets or credentials in scripts
 
