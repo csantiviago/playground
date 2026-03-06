@@ -1,5 +1,36 @@
+# Editor files
 *.swp
 *.swo
 *~
+*.bak
+*.tmp
+
+# Environment files
 .env
 .env.*
+*.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+*.exe
+*.msi
+
+# Test artifacts
+/tmp/bats-mock
+*.bats.out
+
+# Build artifacts
+*.log
+coverage/
+
+# Node (if added later)
+node_modules/
+dist/
+
+# Python (if added later)
+__pycache__/
+*.pyc
+.venv/
