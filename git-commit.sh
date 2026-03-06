@@ -12,11 +12,12 @@ main() {
   # Check if we have a message
   if [[ $# -eq 0 ]] || [[ "$1" != "-m" && "$1" != "--message" ]]; then
     # No message provided, use interactive commit
-    git commit --template=.git/COMMIT_MSG "$@"
-    # Add trailer if commit succeeded
-    if [[ $? -eq 0 ]]; then
-      git commit --amend --no-edit --trailer "${TRAILER}"
+    local commit_status=0
+    git commit --template=.git/COMMIT_MSG "$@" || commit_status=$?
+    if [[ ${commit_status} -ne 0 ]]; then
+      return ${commit_status}
     fi
+    git commit --amend --no-edit --trailer "${TRAILER}"
   else
     # Message provided
     local msg=""
