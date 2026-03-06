@@ -35,8 +35,6 @@ bats -v tests/
 ### Installation (if needed)
 ```bash
 # Install bats test framework
-brew install bats  # macOS
-# or
 sudo apt install bats  # Debian/Ubuntu
 ```
 
@@ -52,11 +50,13 @@ sudo apt install bats  # Debian/Ubuntu
 ### Error Handling
 - Use `set -euo pipefail` at script start
 - Check command exit codes explicitly for critical operations
-- Provide clear error messages with context
+- Provide clear error messages with context to stderr (`>&2`)
 - Use `trap` for cleanup on exit:
   ```bash
   trap 'rm -f /tmp/tempfile' EXIT
   ```
+- For network calls, always set timeouts: `curl --max-time 10 --connect-timeout 5`
+- Use `curl --fail` to treat HTTP 4xx/5xx as errors
 
 ### Variables
 - Use `local` for function-scoped variables
@@ -122,5 +122,19 @@ sudo apt install bats  # Debian/Ubuntu
 ## Dependencies
 
 - Minimize external dependencies
-- Check for required commands at script start
+- Check for required commands at script start using `command -v`:
+  ```bash
+  check_dependencies() {
+    local missing=()
+    for cmd in curl jq; do
+      if ! command -v "$cmd" &>/dev/null; then
+        missing+=("$cmd")
+      fi
+    done
+    if [[ ${#missing[@]} -gt 0 ]]; then
+      printf 'Error: missing required commands: %s\n' "${missing[*]}" >&2
+      return 1
+    fi
+  }
+  ```
 - Use `#!/usr/bin/env bash` for portability over `#!/bin/bash`
